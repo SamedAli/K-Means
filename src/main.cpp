@@ -5,24 +5,11 @@
 #include <vector>
 #include <limits>
 
+#include "includes/point.h"
 char DELIMITOR = ',';
 
-struct Point {
-	double m_x, m_y;
-	int m_cluster;
-	double m_min_distance;
-
-	Point() : m_x{ 0.0 }, m_y{ 0.0 }, m_cluster{ -1 }, m_min_distance{ std::numeric_limits<double>::max() } {}
-	Point(double x, double y) : m_x{x}, m_y{y}, m_cluster{ -1 }, m_min_distance{ std::numeric_limits<double>::max() } {}
-
-	double distance(Point p)
-	{
-		return (p.m_x - m_x) * (p.m_x - m_x) + (p.m_y - m_y) * (p.m_y - m_y);
-	}
-};
-
-std::vector<Point> readcsv(){
-    std::vector<Point> points;
+std::vector<point::Point2D> readcsv(){
+    std::vector<point::Point2D> points;
     std::string line;
     std::ifstream file("D:\\DEVEL\\Development_Datasets\\Mall_Customers.csv");
 	
@@ -43,25 +30,25 @@ std::vector<Point> readcsv(){
         getline(lineStream, bit, '\n');
         y = stof(bit);
 
-        points.push_back(Point(x, y));
+        points.push_back(point::Point2D(x, y));
     }
     return points;
 }
 
-std::vector<Point>* kMeansClustering(std::vector<Point> *points, int epochs, int k){
+std::vector<point::Point2D>* kMeansClustering(std::vector<point::Point2D> *points, int epochs, int k){
 	const int n_points = points->size();
-	std::vector<Point> centroids;
+	std::vector<point::Point2D> centroids;
 	srand(time(0));  // need to set the random seed
 	
 	for (int i = 0; i < k; ++i) {
 		centroids.push_back(points->at(rand() % n_points));
 	}
 
-	for (std::vector<Point>::iterator c = begin(centroids); c != end(centroids); ++c) {
+	for (std::vector<point::Point2D>::iterator c = begin(centroids); c != end(centroids); ++c) {
     int clusterId = c - begin(centroids); // quick hack to get cluster index
 
-		for (std::vector<Point>::iterator it = points->begin(); it != points->end(); ++it) {	
-			Point p = *it;
+		for (std::vector<point::Point2D>::iterator it = points->begin(); it != points->end(); ++it) {	
+			point::Point2D p = *it;
 			double dist = c->distance(p);
 
 			if (dist < p.m_min_distance) {
@@ -84,7 +71,7 @@ std::vector<Point>* kMeansClustering(std::vector<Point> *points, int epochs, int
 
 
 	// Iterate over points to append data to centroids
-	for (std::vector<Point>::iterator it = points->begin(); it != points->end(); ++it) {
+	for (std::vector<point::Point2D>::iterator it = points->begin(); it != points->end(); ++it) {
 		int clusterId = it->m_cluster;
 		nPoints[clusterId] += 1;
 		sumX[clusterId] += it->m_x;
@@ -94,7 +81,7 @@ std::vector<Point>* kMeansClustering(std::vector<Point> *points, int epochs, int
 	}
 
 	// Compute the new centroids
-	for (std::vector<Point>::iterator c = begin(centroids); c != end(centroids); ++c) {
+	for (std::vector<point::Point2D>::iterator c = begin(centroids); c != end(centroids); ++c) {
 		int clusterId = c - begin(centroids);
 		c->m_x = sumX[clusterId] / nPoints[clusterId];
 		c->m_y = sumY[clusterId] / nPoints[clusterId];
@@ -103,12 +90,12 @@ std::vector<Point>* kMeansClustering(std::vector<Point> *points, int epochs, int
 	return points;
 }
 
-void write_to_file(std::vector<Point> *points){
+void write_to_file(std::vector<point::Point2D> *points){
 	std::ofstream myfile;
 	myfile.open("..\\output\\output.csv");
 	myfile << "x,y,c" << std::endl;
 
-	for (std::vector<Point>::iterator it = points->begin(); it != points->end(); ++it) {
+	for (std::vector<point::Point2D>::iterator it = points->begin(); it != points->end(); ++it) {
 		myfile << it->m_x << "," << it->m_y << "," << it->m_cluster << std::endl;
 	}
 	myfile.close();
@@ -116,10 +103,10 @@ void write_to_file(std::vector<Point> *points){
 
 int main() {
 	std::cout << "Reading datapoints \n";
-	std::vector<Point> points = readcsv();
+	std::vector<point::Point2D> points = readcsv();
 
 	std::cout << "KMeans clustering.. \n";
-	std::vector<Point> *clustered_points = kMeansClustering(&points, 1000, 5);
+	std::vector<point::Point2D> *clustered_points = kMeansClustering(&points, 1000, 5);
 
 	std::cout << "writing datapoints \n";
 	write_to_file(clustered_points);

@@ -1,6 +1,7 @@
 .vscode/
 */generated/*
-
+build/*
+notes.txt
 # Prerequisites
 *.d
 
