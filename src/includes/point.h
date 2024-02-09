@@ -1,22 +1,29 @@
 #ifndef POINT_H
 #define POINT_H
 
-namespace point{
+namespace point
+{
 
-    struct Point2D  {
+    class Point2D
+    {
+    public:
         double m_x, m_y;
         int m_cluster;
         double m_min_distance;
 
-        Point2D ();
-        Point2D (double x, double y);
+        Point2D();
+        Point2D(double x, double y);
 
-        double distance(Point2D p);
+        virtual double distance(Point2D p);
+
+    private:
     };
 
-    struct Clustered2DPoint: Point2D  {
-       
+    class Clustered2DPoint : public Point2D
+    {
+    public:
+        double distance(Point2D p) final;
     };
 }
 
-#endif 
+#endif
